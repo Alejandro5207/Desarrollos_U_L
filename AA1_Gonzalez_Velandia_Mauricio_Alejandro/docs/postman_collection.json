@@ -1,0 +1,146 @@
+{
+	"info": {
+		"_postman_id": "api-productos-gonzalez",
+		"name": "API REST Productos - AA1_Gonzalez_Velandia_Mauricio_Alejandro",
+		"description": "Colección de Postman para probar la API REST de productos desarrollada por Mauricio González",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET - Obtener todos los productos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}",
+					"host": [
+						"{{base_url}}"
+					]
+				},
+				"description": "Obtiene todos los productos activos de la base de datos"
+			},
+			"response": []
+		},
+		{
+			"name": "GET - Obtener producto por ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}?id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1",
+							"description": "ID del producto a obtener"
+						}
+					]
+				},
+				"description": "Obtiene un producto específico por su ID"
+			},
+			"response": []
+		},
+		{
+			"name": "GET - Buscar productos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}?search=smartphone",
+					"host": [
+						"{{base_url}}"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "smartphone",
+							"description": "Término de búsqueda"
+						}
+					]
+				},
+				"description": "Busca productos por nombre o descripción"
+			},
+			"response": []
+		},
+		{
+			"name": "POST - Crear nuevo producto",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"nombre\": \"Producto de Prueba\",\n  \"descripcion\": \"Este es un producto creado desde Postman\",\n  \"precio\": 99.99,\n  \"stock\": 10,\n  \"categoria_id\": 1,\n  \"imagen_url\": \"https://example.com/test.jpg\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}",
+					"host": [
+						"{{base_url}}"
+					]
+				},
+				"description": "Crea un nuevo producto en la base de datos"
+			},
+			"response": []
+		},
+		{
+			"name": "PUT - Actualizar producto",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": 1,\n  \"nombre\": \"Producto Actualizado\",\n  \"descripcion\": \"Descripción actualizada desde Postman\",\n  \"precio\": 199.99,\n  \"stock\": 5,\n  \"categoria_id\": 2,\n  \"imagen_url\": \"https://example.com/updated.jpg\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}",
+					"host": [
+						"{{base_url}}"
+					]
+				},
+				"description": "Actualiza un producto existente"
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE - Eliminar producto",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}?id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1",
+							"description": "ID del producto a eliminar"
+						}
+					]
+				},
+				"description": "Elimina un producto (soft delete)"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost/AA1_Gonzalez_Velandia_Mauricio_Alejandro/api/productos.php",
+			"type": "string"
+		}
+	]
+}

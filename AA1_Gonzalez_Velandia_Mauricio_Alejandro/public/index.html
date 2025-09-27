@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API REST - Control Minimalista</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            color: var(--white);
+            font-weight: 500;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .status-item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0.3;
+            }
+        }
+
+        .main-content {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(20px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .api-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .api-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .api-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .api-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--white);
+        }
+
+        .api-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .api-description {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background: var(--white);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            height: 80px;
+            resize: vertical;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin: 0.25rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .btn-error {
+            background: var(--error);
+            color: var(--white);
+        }
+
+        .btn-info {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .response {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .response::before {
+            content: 'Respuesta';
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: var(--white);
+            padding: 0 8px;
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: var(--gray-500);
+        }
+
+        .response.success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .response.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                padding: 2rem;
+            }
+
+            .api-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Centro de Control API</h1>
+            <p class="subtitle">Sistema de Control API</p>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <span>Servidor Activo</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-database"></i>
+                <span>MySQL Conectado</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-code"></i>
+                <span>PHP 8.0</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>CORS Habilitado</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary);">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stat-number" id="totalProducts">-</div>
+                    <div class="stat-label">Productos Totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--secondary);">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Categorías</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--accent);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number" id="totalValue">-</div>
+                    <div class="stat-label">Valor Total (COP)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="stat-number" id="responseTime">-</div>
+                    <div class="stat-label">Tiempo Respuesta</div>
+                </div>
+            </div>
+
+            <!-- API Cards -->
+            <div class="api-grid">
+                <!-- GET All Products -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <div class="api-icon" style="background: var(--success);">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="api-title">Obtener Todos los Productos</div>
+                    </div>
+                    <p class="api-description">Recupera el catálogo completo de productos con datos en tiempo real</p>
+                    <button class="btn btn-success" onclick="getAllProducts()">
+                        <i class="fas fa-download"></i>
+                        Obtener Productos
+                    </button>
+                    <div id="getAllResponse" class="response" style="display: none;"></div>
+                </div>
+
+                <!-- GET Product by ID -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <div class="api-icon" style="background: var(--accent);">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="api-title">Obtener Producto por ID</div>
+                    </div>
+                    <p class="api-description">Busca un producto específico usando su identificador único</p>
+                    <div class="form-group">
+                        <label class="form-label">ID del Producto</label>
+                        <input type="number" class="form-input" id="productId" placeholder="Ingresa el ID del producto"
+                            value="1">
+                    </div>
+                    <button class="btn btn-info" onclick="getProductById()">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                    <div id="getByIdResponse" class="response" style="display: none;"></div>
+                </div>
+
+                <!-- POST Create Product -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <div class="api-icon" style="background: var(--primary);">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="api-title">Crear Producto</div>
+                    </div>
+                    <p class="api-description">Añade un nuevo producto al catálogo del sistema</p>
+                    <div class="form-group">
+                        <label class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-input" id="newName" placeholder="Nombre del producto"
+                            value="Producto de Prueba">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-input form-textarea" id="newDescription"
+                            placeholder="Descripción del producto">Descripción del producto de prueba</textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Precio (COP)</label>
+                            <input type="number" class="form-input" id="newPrice" placeholder="0" value="399999"
+                                step="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-input" id="newStock" placeholder="0" value="10">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">ID de Categoría</label>
+                            <input type="number" class="form-input" id="newCategoryId" placeholder="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">URL de Imagen</label>
+                            <input type="url" class="form-input" id="newImageUrl" placeholder="https://..."
+                                value="https://example.com/test.jpg">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createProduct()">
+                        <i class="fas fa-plus"></i>
+                        Crear
+                    </button>
+                    <div id="createResponse" class="response" style="display: none;"></div>
+                </div>
+
+                <!-- PUT Update Product -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <div class="api-icon" style="background: var(--warning);">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="api-title">Actualizar Producto</div>
+                    </div>
+                    <p class="api-description">Modifica la información de un producto existente</p>
+                    <div class="form-group">
+                        <label class="form-label">ID del Producto</label>
+                        <input type="number" class="form-input" id="updateId" placeholder="ID del producto" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nuevo Nombre</label>
+                        <input type="text" class="form-input" id="updateName" placeholder="Nuevo nombre"
+                            value="Producto Actualizado">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nueva Descripción</label>
+                        <textarea class="form-input form-textarea" id="updateDescription"
+                            placeholder="Nueva descripción">Descripción actualizada</textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Nuevo Precio (COP)</label>
+                            <input type="number" class="form-input" id="updatePrice" placeholder="0" value="799999"
+                                step="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nuevo Stock</label>
+                            <input type="number" class="form-input" id="updateStock" placeholder="0" value="5">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Nueva Categoría ID</label>
+                            <input type="number" class="form-input" id="updateCategoryId" placeholder="1" value="2">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nueva URL de Imagen</label>
+                            <input type="url" class="form-input" id="updateImageUrl" placeholder="https://..."
+                                value="https://example.com/updated.jpg">
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="updateProduct()">
+                        <i class="fas fa-save"></i>
+                        Actualizar
+                    </button>
+                    <div id="updateResponse" class="response" style="display: none;"></div>
+                </div>
+
+                <!-- DELETE Product -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <div class="api-icon" style="background: var(--error);">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                        <div class="api-title">Eliminar Producto</div>
+                    </div>
+                    <p class="api-description">Elimina un producto del sistema (eliminación suave)</p>
+                    <div class="form-group">
+                        <label class="form-label">ID del Producto</label>
+                        <input type="number" class="form-input" id="deleteId" placeholder="ID del producto" value="1">
+                    </div>
+                    <button class="btn btn-error" onclick="deleteProduct()">
+                        <i class="fas fa-trash"></i>
+                        Eliminar
+                    </button>
+                    <div id="deleteResponse" class="response" style="display: none;"></div>
+                </div>
+
+                <!-- Search Products -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <div class="api-icon" style="background: var(--secondary);">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="api-title">Buscar Productos</div>
+                    </div>
+                    <p class="api-description">Busca productos por nombre o descripción</p>
+                    <div class="form-group">
+                        <label class="form-label">Término de Búsqueda</label>
+                        <input type="text" class="form-input" id="searchTerm" placeholder="Término de búsqueda"
+                            value="Samsung">
+                    </div>
+                    <button class="btn btn-primary" onclick="searchProducts()">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                    <div id="searchResponse" class="response" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Desarrollado por Mauricio González • Ingeniero de Software</p>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <i class="fab fa-php"></i>
+                    <span>PHP 8.0</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-database"></i>
+                    <span>MySQL</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-js-square"></i>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-html5"></i>
+                    <span>HTML5</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-css3-alt"></i>
+                    <span>CSS3</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-api"></i>
+                    <span>REST API</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '../api/productos.php';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadStats();
+        });
+
+        async function loadStats() {
+            try {
+                const startTime = performance.now();
+                const response = await fetch(API_BASE_URL);
+                const endTime = performance.now();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalProducts').textContent = data.data ? data.data.length : 0;
+                    document.getElementById('responseTime').textContent = Math.round(endTime - startTime) + 'ms';
+
+                    if (data.data && data.data.length > 0) {
+                        const totalValue = data.data.reduce((sum, product) => {
+                            return sum + (parseFloat(product.precio) * parseInt(product.stock));
+                        }, 0);
+                        document.getElementById('totalValue').textContent = '$' + totalValue.toLocaleString('es-CO');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function showResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `response ${isError ? 'error' : 'success'}`;
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = '<div class="loading"><div class="spinner"></div><p>Procesando solicitud...</p></div>';
+        }
+
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                const data = await response.json();
+                return { data, status: response.status, ok: response.ok };
+            } catch (error) {
+                return { data: { error: error.message }, status: 0, ok: false };
+            }
+        }
+
+        async function getAllProducts() {
+            showLoading('getAllResponse');
+            const result = await makeRequest(API_BASE_URL);
+            showResponse('getAllResponse', result.data, !result.ok);
+            if (result.ok) loadStats();
+        }
+
+        async function getProductById() {
+            const id = document.getElementById('productId').value;
+            if (!id) {
+                showResponse('getByIdResponse', { error: 'Por favor ingresa un ID de producto' }, true);
+                return;
+            }
+            showLoading('getByIdResponse');
+            const result = await makeRequest(`${API_BASE_URL}?id=${id}`);
+            showResponse('getByIdResponse', result.data, !result.ok);
+        }
+
+        async function createProduct() {
+            const productData = {
+                nombre: document.getElementById('newName').value,
+                descripcion: document.getElementById('newDescription').value,
+                precio: parseFloat(document.getElementById('newPrice').value),
+                stock: parseInt(document.getElementById('newStock').value),
+                categoria_id: parseInt(document.getElementById('newCategoryId').value),
+                imagen_url: document.getElementById('newImageUrl').value
+            };
+
+            showLoading('createResponse');
+            const result = await makeRequest(API_BASE_URL, {
+                method: 'POST',
+                body: JSON.stringify(productData)
+            });
+            showResponse('createResponse', result.data, !result.ok);
+            if (result.ok) loadStats();
+        }
+
+        async function updateProduct() {
+            const productData = {
+                id: parseInt(document.getElementById('updateId').value),
+                nombre: document.getElementById('updateName').value,
+                descripcion: document.getElementById('updateDescription').value,
+                precio: parseFloat(document.getElementById('updatePrice').value),
+                stock: parseInt(document.getElementById('updateStock').value),
+                categoria_id: parseInt(document.getElementById('updateCategoryId').value),
+                imagen_url: document.getElementById('updateImageUrl').value
+            };
+
+            showLoading('updateResponse');
+            const result = await makeRequest(API_BASE_URL, {
+                method: 'PUT',
+                body: JSON.stringify(productData)
+            });
+            showResponse('updateResponse', result.data, !result.ok);
+            if (result.ok) loadStats();
+        }
+
+        async function deleteProduct() {
+            const id = document.getElementById('deleteId').value;
+            if (!id) {
+                showResponse('deleteResponse', { error: 'Por favor ingresa un ID de producto' }, true);
+                return;
+            }
+            showLoading('deleteResponse');
+            const result = await makeRequest(`${API_BASE_URL}?id=${id}`, {
+                method: 'DELETE'
+            });
+            showResponse('deleteResponse', result.data, !result.ok);
+            if (result.ok) loadStats();
+        }
+
+        async function searchProducts() {
+            const searchTerm = document.getElementById('searchTerm').value;
+            if (!searchTerm) {
+                showResponse('searchResponse', { error: 'Por favor ingresa un término de búsqueda' }, true);
+                return;
+            }
+            showLoading('searchResponse');
+            const result = await makeRequest(`${API_BASE_URL}?search=${encodeURIComponent(searchTerm)}`);
+            showResponse('searchResponse', result.data, !result.ok);
+        }
+    </script>
+</body>
+
+</html>
